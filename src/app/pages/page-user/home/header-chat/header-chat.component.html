@@ -1,0 +1,13 @@
+<div class="chat-header clear_fix">
+    <div class="row">
+        <div class="col-6">
+            <a routerLink="profil/{{user?.username}}" data-toggle="modal" data-target="#view_info">
+                <img  *ngIf="!isLoad" alt="avatar" src="{{user.image}}">
+            </a>
+            <div class="chat-about d-grid">
+                <h6 class="m-b-0 text-light">{{user?.username }}</h6>
+                <small class="text-light">Last seen: 2 hours ago</small>
+            </div>
+        </div>        
+    </div>
+</div>

@@ -1,0 +1,35 @@
+@import '../../../../../@shared/themes/_varibale/variable';
+@import '../../../../../@shared/themes/classe/class.scss';
+ul{
+    position: absolute;
+    top: 45px;
+    left: 0px;
+    display: grid;
+    row-gap: 10px;
+    width: 100%;
+    z-index: 22;
+    background-color: white;
+    li{
+        padding: 5px;
+        width: 100%;
+        box-shadow: 1px 2px 5px #b5b5b6;
+        padding: 10px 15px;
+        list-style: none;
+        border-radius: 3px;
+        animation:  fadeOutleft .1s ease-in-out;
+        &:hover {
+            background: #efefef;
+            cursor: pointer
+        }
+        img,span{
+            padding: 0 5px;
+        }
+        img{
+            width: 50px;
+            border-radius: 50%;
+        }
+        span{
+            font-size: $text-size;
+        }
+    }
+}

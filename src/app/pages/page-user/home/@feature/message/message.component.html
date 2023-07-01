@@ -1,0 +1,8 @@
+<!-- <li class="clearfix other"> -->
+<div class="message-data text-right">
+  <img *ngIf="!owner" src={{image}} alt="avatar" />
+</div>
+<div  [ngClass]="{'message  text-light' :true , 'other-message':!owner , 'my-message':owner}">
+  <small  class="message-data-time">{{Message.createdAt | date}}</small>
+  <h3>{{Message.messages}}</h3>
+</div>

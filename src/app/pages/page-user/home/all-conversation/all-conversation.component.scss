@@ -1,0 +1,115 @@
+@import '../../../../@shared/themes/classe/class.scss';
+@import '../../../../@shared/themes/_varibale/variable';
+.container-fluid{
+    height: 100%;
+    overflow: hidden;
+}
+app-search{
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 22;
+}
+.clear_fix{
+    display: flex;
+    justify-content: center;
+    padding: 0;
+}
+.people-list {
+    padding: 20px;
+    height: 100vh;
+    overflow: auto;
+    -moz-transition: .5s;
+    -o-transition: .5s;
+    -webkit-transition: .5s;
+    transition: .5s;
+    .chat-list li {
+        padding: 10px 15px;
+        list-style: none;
+        border-radius: 3px;
+        &:hover {
+            background: #efefef;
+            cursor: pointer
+        }
+        .name {
+            font-size: $text-size;
+        }
+    }
+    img {
+        float: left;
+        border-radius: 50%
+    }
+    .about {
+        float: left;
+        padding-left: 8px
+    }
+    .status {
+        color: #999;
+        font-size: 13px
+    }
+}
+.active {
+    background: #efefef
+}
+
+.people-list .chat-list img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%
+}
+.online,
+.offline,
+.me {
+    margin-right: 2px;
+    font-size: 8px;
+    vertical-align: middle
+}
+
+.online {
+    color: #86c541
+}
+
+.offline {
+    color: #e47297
+}
+
+.me {
+    color: #1d8ecd
+}
+
+// .float-right {
+//     float: right
+// }
+@media only screen and (max-width: 767px) {
+    .chat-app .people-list {
+        height: 465px;
+        width: 100%;
+        overflow-x: auto;
+        background: #fff;
+        left: -400px;
+        display: none
+    }
+    .chat-app .people-list.open {
+        left: 0
+    }
+    .chat-app .chat {
+        margin: 0
+    }
+    .chat-app .chat .chat-header {
+        border-radius: 0.55rem 0.55rem 0 0
+    }
+    .chat-app .chat-history {
+        height: 300px;
+        overflow-x: auto
+    }
+}
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) and (-webkit-min-device-pixel-ratio: 1) {
+    .chat-app .chat-list {
+        height: 480px;
+        overflow-x: auto
+    }
+    .chat-app .chat-history {
+        height: calc(100vh - 350px);
+        overflow-x: auto
+    }
+  }

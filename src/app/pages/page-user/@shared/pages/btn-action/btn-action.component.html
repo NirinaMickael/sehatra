@@ -1,0 +1,9 @@
+<!-- class="m-t-10 mx-2 waves-effect waves-dark btn btn-primary btn-md btn-rounded" -->
+
+<p
+  *ngFor="let item of btn"
+  class="m-t-10 mx-2 waves-effect waves-dark btn btn-primary btn-md btn-rounded"
+  (click)="handleClick(item.action)"
+  >
+  {{ item.name }}
+</p>

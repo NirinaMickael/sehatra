@@ -1,0 +1,16 @@
+@import '../../@shared/themes/classes.scss';
+@import '../../../../@shared/themes/_varibale/variable';
+.chat-header {
+    padding: 15px 20px;
+    background-color:$primary-color;
+    border-bottom: 2px solid #f4f7f6
+}
+.chat-header img {
+    float: left;
+    border-radius: 40px;
+    width: 40px
+}
+.chat-header .chat-about {
+    float: left;
+    padding-left: 10px
+}

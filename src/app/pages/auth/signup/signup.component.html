@@ -1,0 +1,66 @@
+<
+<div class="wrapper-form signup">
+  <div class="wrapper-connect">
+    <h1>Or reate your account with</h1>
+    <a href="#" class="btn btn-social btn-facebook"
+      ><i class="fa fa-facebook"></i> Sign in with Facebook</a
+    >
+    <a href="#" class="btn btn-social btn-google"
+      ><i class="fa fa-google"></i> Sign in with Google</a
+    >
+  </div>
+  <div class="wrapper-classic">
+    <form
+      class="form"
+      (submit)="handleSubmit($event)"
+      [formGroup]="registerForm"
+    >
+      <fieldset class="username">
+        <input type="text" placeholder="username" formControlName="username" />
+        <span *ngIf="registerForm.get('username')?.errors">
+          <small *ngIf="registerForm.get('username')?.hasError('required')"
+            >Name is required.</small
+          >
+          <small *ngIf="registerForm.get('username')?.hasError('minlength')"
+            >The minimum length for username field is
+            {{registerForm.get('username')?.errors?.['minlength'].requiredLength}}
+            characters..</small
+          >
+        </span>
+      </fieldset>
+      <fieldset class="email">
+        <input type="email" placeholder="email" formControlName="email" />
+        <small *ngIf="registerForm.get('email')?.hasError('required')"
+        >Email is required.</small
+      >
+      <small *ngIf="registerForm.get('email')?.hasError('email')"
+      >Invalid email.</small
+    >
+      </fieldset>
+      <fieldset class="password">
+        <input
+          type="password"
+          placeholder="password"
+          formControlName="password"
+          
+        />
+        <small *ngIf="registerForm.get('password')?.hasError('required')"
+        >Password is required.</small
+      >
+      </fieldset>
+      <button
+        type="submit"
+        class="buttonNeomorphic"
+        [disabled]="registerForm.status==='INVALID'?true:false"
+      >
+        <span>sign up</span>
+      </button>
+    </form>
+    <div class="wrapper-auth">
+      <span class="or">Or</span>
+      <div>
+        <button routerLink="../" class="Btn"><span>Login</span></button>
+      </div>
+    </div>
+  </div>
+</div>

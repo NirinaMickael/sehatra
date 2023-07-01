@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "login-349505": {
+      "hosting": {
+        "Angular-high-level": [
+          "login-349505"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "login-349505"
+  }
+}

@@ -1,0 +1,609 @@
+import { AfterViewInit, Component, EventEmitter, OnInit, Output } from "@angular/core";
+import * as THREE from "three";
+import { Font } from "three/examples/jsm/loaders/FontLoader";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry"
+import { TTFLoader } from "three/examples/jsm/loaders/TTFLoader"
+import {
+  AmbientLight,
+  BoxGeometry,
+  Mesh,
+  MeshBasicMaterial,
+  MeshPhongMaterial,
+  MeshStandardMaterial,
+  Object3D,
+  PointLight,
+  Raycaster,
+  TextureLoader,
+  Vector3,
+} from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { isEqual } from "./utils/math";
+import { BehaviorSubject, fromEvent, Observable } from "rxjs";
+import { debounceTime, filter } from "rxjs/operators";
+import { GROUND } from "./contants/Ground";
+import { Easing, Tween, update as TweenUpdateFunc } from "@tweenjs/tween.js";
+import { inspectModel } from "./utils/models-inspect";
+import materialDefault from "./utils/Materials";
+// import { VirtualService } from "../@core/services/virtual/virtual.service";
+// import { Product } from "../@core/schema/product";
+// import { dataProduct } from "./db/fake";
+// import { OeuvreService } from "../@core/services/oeuvre/oeuvre.service";
+@Component({
+  selector: 'app-virtuel',
+  templateUrl: './virtuel.component.html',
+  styleUrls: ['./virtuel.component.scss']
+})
+export class VirtuelComponent implements OnInit {
+  raycaster: Raycaster;
+  renderer!: THREE.WebGLRenderer;
+  scene!: THREE.Scene;
+  camera!: THREE.PerspectiveCamera;
+  container!: Element;
+  orbitControl!: OrbitControls;
+  t: any = [];
+  delta!: number;
+  prevTime: number = 0;
+  alert!: boolean;
+  //#region default value params;
+  cameraDefaultPosition = new Vector3(-6, 3, 2);
+  enableOrbitControls = false;
+  defaultLongitude = 0;
+  videoTexture !: THREE.VideoTexture;
+  updateFunctions: ((...args: any[]) => void)[] = [];
+  isIntercationLocked = false;
+
+  isCameraLocked: any;
+  isUserInteracting = false;
+  onPointerDownMouseX: any;
+  onPointerDownMouseY: any;
+  onPointerDownLon: any;
+  longitude: any;
+  onPointerDownLat: any;
+  latitude: any;
+  onDocumentMouseWheel: any;
+  phi: any;
+  theta: any;
+  dragged = false;
+  startX = 0;
+  startY = 0;
+  referencePosition!: THREE.Mesh;
+  lastMove: any;
+  textureLoader: THREE.TextureLoader = new THREE.TextureLoader();
+  ListShop = false;
+  CardShop = false;
+  modelObjects: any[] = [];
+  // allProduct!: Product[];
+  // currentProduct!: Product;
+  containerSelector = "#virtual-visit";
+  video!: any;
+  @Output() onSide = new EventEmitter<boolean>();
+  constructor() {
+    this.raycaster = new THREE.Raycaster();
+  }
+
+  ngOnInit(): void {
+    // this.virtual.cardShop$.subscribe((e) => (this.CardShop = e));
+    // this.virtual.ListShop$.subscribe((e) => (this.ListShop = e));
+    // this.virtual.cardShop$.subscribe((e) => (this.alert = e));
+  }
+  // isOpen(e: any) {
+  //   this.virtual.alert$.next(e);
+  // }
+  // addAction(e: any) {
+  //   console.log(e);
+  //   this.virtual.cardShop$.next(!e);
+  //   this.virtual.ListShop$.next(e);
+  // }
+  // cancelAction(e: any) {
+  //   this.virtual.cardShop$.next(e);
+  //   this.virtual.ListShop$.next(e);
+  // }
+  // closeAction(e: any) {
+  //   this.virtual.cardShop$.next(e);
+  //   this.virtual.ListShop$.next(e);
+  // }
+  ngAfterViewInit() {
+    // let a:any;
+    // this.virtual.ListShop$.subscribe(e=>{
+    //   this.ListShop = e;
+    //   a=e;
+    // })
+    // this.virtual.cardShop$.subscribe(e=>{
+    //   this.CardShop = e;
+    //   this.init(!a && !e)
+    // })
+    // this.prod.getAllOeuvre().subscribe((res) => {
+    //   this.allProduct = (res as any)?.data;
+    //   this.init();
+    // });
+    this.init();
+  }
+  init() {
+    this.initScene();
+    this.loadModel();
+    this.setupLight();
+    this.setOrbitalControls();
+    this.init360();
+    this.initEvent();
+    this.initTween();
+    this.addSceneGUI();
+    this.initRefPos();
+  }
+  addSceneGUI() {
+    // const gui = new GUI();
+    // const folder = gui.addFolder('GUI Scene');
+    // folder.add(this.renderer, 'toneMappingExposure', 0, 1);
+    // folder.add(this.renderer, 'toneMapping', {
+    //   'None': THREE.NoToneMapping,
+    //   'Linear': THREE.LinearToneMapping,
+    //   'Reinhard': THREE.ReinhardToneMapping,
+    //   'Cineon': THREE.CineonToneMapping,
+    //   'ACESFilmic': THREE.ACESFilmicToneMapping,
+    // })
+  }
+  initScene(): void {
+    const fov = (window.innerHeight * 65) / 935;
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera(
+      fov + 25,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      10000
+    );
+    this.container = document.querySelector(this.containerSelector) as Element;
+    this.video = document.getElementById("video") as Element;
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.outputEncoding = THREE.sRGBEncoding;
+
+    this.container.appendChild(this.renderer.domElement);
+    this.camera.position.copy(this.cameraDefaultPosition);
+    this.camera.updateProjectionMatrix();
+    this.camera.lookAt(0, 0, 0);
+    this.camera.updateProjectionMatrix();
+    this.update();
+
+    this.scene.background = materialDefault.hdrEquirect;
+  }
+
+  initTween(): void {
+    this.updateFunctions.push((delta) => {
+      TweenUpdateFunc();
+    });
+  }
+
+  update(): void {
+    requestAnimationFrame(this.update.bind(this));
+    const time = performance.now();
+    this.delta = (time - this.prevTime) / 1000;
+    for (let updateFun of this.updateFunctions) {
+      updateFun(this.delta);
+    }
+
+    this.prevTime = time;
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  loadModel() {
+    const loader = new GLTFLoader();
+    // play boutton
+    loader.load("assets/models/vr_gallery_round_baked.glb", (result) => {
+      result.scene.traverse((obj: Object3D) => {
+        if (!(obj as any).isMesh) {
+          return;
+        } else {
+          this.modelObjects.push(obj);
+          inspectModel(obj as Mesh, this.scene);
+        }
+        if (["Object_18","Object_9","Object_14","Object_17","Object_22","Object_13","Object_21","Object_20","Object_21","Object_12","Object_11","Object_10"].includes(obj.name)) {
+          // let oeuvreName = obj.name.replace('__', '_');
+          // oeuvreName = oeuvreName.replace('_tableau', '');
+          // const product = this.allProduct.find(
+          //   (o) => o.objectName === obj.name
+          // );
+          // obj.visible = !!product;
+
+          if (true) {
+            this.textureLoader.load(`assets/images/${obj.name}.jpeg`, (texture) => {
+              texture.flipY = true;
+              (obj as Mesh<any, MeshBasicMaterial>).material.map = texture;
+              (obj as Mesh<any, MeshBasicMaterial>).material.needsUpdate = true;
+              (obj as any).material.map.encoding = THREE.sRGBEncoding;
+            });
+          }
+          //   texture.flipY = false;
+          //   (obj as Mesh<any, MeshBasicMaterial>).material.map = texture;
+          //   (obj as Mesh<any, MeshBasicMaterial>).material.needsUpdate = true;
+          //   (obj as any).material.map.encoding = THREE.sRGBEncoding;
+
+          // }
+        }
+      });
+
+      this.scene.add(result.scene);
+    });
+    setTimeout(()=>{
+      loader.load("assets/models/tv.glb", (result) => {
+        result.scene.traverse((obj: Object3D) => {
+          if (!(obj as any).isMesh) {
+            return;
+          } else {
+            this.modelObjects.push(obj);
+            if (["defaultMaterial"].includes(obj.name)) {
+              // const t = new TextureLoader();
+              // const txt = t.load('assets/materials/misa-banner.png');
+              // txt.encoding = THREE.sRGBEncoding;
+              // // txt.flipY = false;
+              // const mat = new MeshBasicMaterial({map: txt, side: THREE.FrontSide});
+              this.videoTexture = new THREE.VideoTexture(this.video as any);
+              this.videoTexture.minFilter = THREE.LinearFilter;
+              this.videoTexture.magFilter = THREE.LinearFilter;
+              this.videoTexture.flipY = false;
+              this.videoTexture.needsUpdate = true;
+              const videoMaterial = new THREE.MeshBasicMaterial({
+                map: this.videoTexture,
+                side: THREE.FrontSide,
+                toneMapped: false,
+              });
+              (obj as any).material = videoMaterial;
+            }
+  
+            // if (['Object_5', 'Object_4'].includes(obj.name)) {
+            //   (obj as Mesh<any, MeshStandardMaterial>).material.metalness = 0.8;
+            //   (obj as Mesh<any, MeshStandardMaterial>).material.roughness = 0;
+            //   (obj as Mesh<any, MeshStandardMaterial>).material.map = materialDefault.hdrEquirect;
+            //   (obj as Mesh<any, MeshStandardMaterial>).material.needsUpdate = true;
+            // }
+          }
+        });
+        this.videoTexture.needsUpdate = true;
+        result.scene.scale.set(1.5, 1.5, 1.1);
+        result.scene.rotation.y = Math.PI / 2;
+        result.scene.position.set(
+      -0.015098434221760743,
+      1.2,
+      0.025021741595387156
+        );
+        this.scene.add(result.scene);
+      });  
+
+      loader.load("assets/models/rollup/scene.gltf", (result) => {
+        result.scene.traverse((obj: Object3D) => {
+          if (!(obj as any).isMesh) {
+            return;
+          } else {
+            this.modelObjects.push(obj);
+            if(obj.name != "Object_2"){
+              obj.visible = false;
+            }else{
+              const t = new TextureLoader();
+              const txt = t.load('assets/materials/rollup.png');
+              txt.encoding = THREE.sRGBEncoding;
+              // txt.flipY = false;
+              const mat = new MeshBasicMaterial({map: txt, side: THREE.FrontSide});
+              (obj as any).material = mat;
+            }
+  
+            // if (['Object_5', 'Object_4'].includes(obj.name)) {
+            //   (obj as Mesh<any, MeshStandardMaterial>).material.metalness = 0.8;
+            //   (obj as Mesh<any, MeshStandardMaterial>).material.roughness = 0;
+            //   (obj as Mesh<any, MeshStandardMaterial>).material.map = materialDefault.hdrEquirect;
+            //   (obj as Mesh<any, MeshStandardMaterial>).material.needsUpdate = true;
+            // }
+          }
+        });
+        this.videoTexture.needsUpdate = true;
+        result.scene.scale.set(0.5, 0.5, 0.4);
+        result.scene.rotation.y = -Math.PI / 2;
+        result.scene.position.set(
+      -1.015098434221760743,
+      0.5,
+      3.025021741595387156
+        );
+        this.scene.add(result.scene);
+      });
+    },5000)
+  }
+
+  setOrbitalControls() {
+    this.orbitControl = new OrbitControls(
+      this.camera,
+      this.renderer.domElement
+    );
+    this.orbitControl.enableDamping = true;
+    this.orbitControl.enableZoom = true;
+    this.orbitControl.enablePan = true;
+    this.orbitControl.update();
+    this.orbitControl.enabled = this.enableOrbitControls;
+    this.updateFunctions.push(() => {
+      this.orbitControl.update();
+    });
+  }
+
+  setupLight() {
+    const ambientLight = new AmbientLight(0xffffff, 0);
+    this.scene.add(ambientLight);
+
+    const intensity = { intensity: 0 };
+    new Tween(intensity)
+      .to({ intensity: 1 })
+      .onUpdate(({ intensity }) => {
+        ambientLight.intensity = intensity;
+      })
+      .onComplete(() => {
+        [{ x: 15.046367094804719, y: 4, z: 3 }].forEach(({ x, y, z }) => {
+          const pointLight = new PointLight(0xffffff, 0.4);
+          pointLight.position.set(x, y, z);
+          this.scene.add(pointLight);
+        });
+      })
+      .easing(Easing.Exponential.In)
+      .duration(3000)
+      .start();
+  }
+
+  //#region Events
+
+  initEvent(): void {
+    this.video.addEventListener("loadeddata", () => {
+      this.video.play();
+    });
+    this.container.addEventListener("click", this.onWindowClick.bind(this));
+    this.container.addEventListener(
+      "dblclick",
+      this.onWindowDblClick.bind(this)
+    );
+    this.container.addEventListener("tap", this.onWindowClick.bind(this));
+    document.addEventListener("pointerdown", this.onPointerDown.bind(this), {
+      passive: false,
+    });
+    document.addEventListener("touchstart", this.onTouchStart.bind(this), {
+      passive: false,
+    });
+    document.addEventListener("touchend", this.onTouchEnd.bind(this), {
+      passive: false,
+    });
+    document.addEventListener("touchmove", (event) => {
+      this.lastMove = event;
+    });
+    window.addEventListener("resize", this.onWindowsResize.bind(this));
+    fromEvent(this.container, "mousemove")
+      .pipe(
+        debounceTime(1),
+        filter(() => !this.isIntercationLocked)
+      )
+      .subscribe((event) => {
+        this.onMouseMove(event);
+      });
+  }
+
+  onWindowsResize() {
+    const fov = (window.innerHeight * 75) / 935;
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.fov = fov;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  onWindowClick(event: any) {
+    if (event.touches) {
+      event = event.touches[0];
+    }
+    const isDragged =
+      !isEqual(event.pageX, this.startX, 3) ||
+      !isEqual(event.pageY, this.startY, 3);
+    if (isDragged) return;
+    let intersections = this.getIntersection(event);
+    if (intersections[0]) {
+      const obj = intersections[0].object;
+      console.log("==>",obj.name);
+      if (GROUND.includes(obj.name)) {
+        this.isIntercationLocked = false;
+        this.isCameraLocked = false;
+        this.onSide.emit(false);
+        if (this.orbitControl.enabled) {
+          this.longitude = -(
+            THREE.MathUtils.radToDeg(this.orbitControl.getAzimuthalAngle()) + 90
+          );
+          this.onWindowsResize();
+        }
+
+        // this.targetedByControl = "";
+        const from = {
+          x: this.camera.position.x,
+          y: this.camera.position.y,
+          z: this.camera.position.z,
+        };
+        const to = {
+          x: intersections[0].point.x,
+          z: intersections[0].point.z,
+          y: 2,
+        };
+        const dx = Math.abs(from.x - to.x);
+        const dz = Math.abs(from.z - to.z);
+        const disptance = Math.sqrt(dx * dx + dz * dz);
+        new Tween(from)
+          .to(to)
+          .onUpdate(({ x, y, z }) => {
+            this.camera.position.x = x;
+            this.camera.position.y = y;
+            this.camera.position.z = z;
+          })
+          .easing(Easing.Quartic.In)
+          .duration(300 * disptance)
+          .start();
+      } else {
+        // let c = this.allProduct.find((e) => e.objectName == obj.name);
+        // if (c) {
+        //   this.currentProduct = c;
+        //   this.virtual.cardShop$.next(true);
+        // }
+        console.log(intersections[0].point)
+        this.onSide.emit(true);
+        // this.isIntercationLocked = true;
+        // this.isCameraLocked = true;
+      }
+    }
+  }
+
+  onWindowDblClick(event: any) {
+    event.preventDefault();
+    event.stopPropagation();
+    return;
+  }
+
+  onMouseMove(event: any) {
+    if (this.isUserInteracting) return;
+    let intersections = this.getIntersection(event);
+    if (intersections[0]) {
+      const obj = intersections[0].object;
+      console.log("name", obj.name);
+      if ([""].includes((obj as any).name) && intersections[0].point.y < -1) {
+        // this.referencePosition.visible = true;
+        // this.referencePosition.position.y = intersections[0].point.y + 0.1;
+      } else {
+        // this.referencePosition.visible = false;
+      }
+      // this.referencePosition.position.x = intersections[0].point.x;
+      // this.referencePosition.position.z = intersections[0].point.z;
+    }
+  }
+
+  onTouchStart(event: any) {
+    this.lastMove = event;
+    if (event.target instanceof HTMLCanvasElement) event.preventDefault();
+    this.onPointerDown(event.touches[0], true);
+  }
+
+  onTouchEnd() {
+    if (this.lastMove?.target instanceof HTMLCanvasElement)
+      this.lastMove.preventDefault();
+    this.onWindowClick(this.lastMove.touches[0]);
+  }
+
+  onPointerDown(event: any, onMobile = false) {
+    if (
+      event.isPrimary === false ||
+      this.isIntercationLocked ||
+      this.isCameraLocked
+    )
+      return;
+    this.startX = event.pageX;
+    this.startY = event.pageY;
+    this.isUserInteracting = true;
+
+    this.onPointerDownMouseX = event.clientX;
+    this.onPointerDownMouseY = event.clientY;
+
+    this.onPointerDownLon = this.longitude;
+    this.onPointerDownLat = this.latitude;
+    if (!onMobile) {
+      document.addEventListener("pointermove", this.onPointerMove.bind(this), {
+        passive: false,
+      });
+      document.addEventListener("pointerup", this.onPointerUp.bind(this), {
+        passive: false,
+      });
+    } else {
+      document.addEventListener("touchmove", this.onTouchMove.bind(this), {
+        passive: false,
+      });
+      document.addEventListener("touchend", this.onPointerUp.bind(this), {
+        passive: false,
+      });
+    }
+  }
+
+  onTouchMove(event: any) {
+    event.preventDefault();
+    event = event.touches[0];
+    this.onPointerMove(event);
+  }
+
+  onPointerMove(event: any) {
+    if (
+      event.isPrimary === false ||
+      this.isUserInteracting === false ||
+      this.isIntercationLocked ||
+      this.isCameraLocked
+    )
+      return;
+    this.dragged = true;
+    this.longitude =
+      (this.onPointerDownMouseX - event.clientX) * 0.1 + this.onPointerDownLon;
+    this.latitude =
+      (event.clientY - this.onPointerDownMouseY) * 0.1 + this.onPointerDownLat;
+  }
+
+  onPointerUp(event: any) {
+    if (this.isIntercationLocked || this.isCameraLocked) return;
+    this.isUserInteracting = false;
+    document.removeEventListener("pointermove", this.onPointerMove);
+    document.removeEventListener("pointerup", this.onPointerUp);
+  }
+  //#endregion
+
+  getIntersection(event: any) {
+    const mouse = { x: 0, y: 0 };
+    mouse.x = (event.clientX / this.renderer.domElement.clientWidth) * 2 - 1;
+    mouse.y = -(event.clientY / this.renderer.domElement.clientHeight) * 2 + 1;
+    this.raycaster.setFromCamera(mouse as any, this.camera);
+    const intersects: any = this.raycaster.intersectObjects(this.modelObjects);
+    return intersects;
+  }
+
+  init360(): void {
+    this.latitude = this.theta = this.phi = 0; // Setting camera orientation
+    this.longitude = this.defaultLongitude;
+    this.updateFunctions.push(() => {
+      if (!this.orbitControl.enabled) {
+        this.latitude = Math.max(-85, Math.min(85, this.latitude));
+        this.phi = THREE.MathUtils.degToRad(90 - this.latitude);
+        this.theta = THREE.MathUtils.degToRad(this.longitude);
+
+        const x = 100 * Math.sin(this.phi) * Math.cos(this.theta);
+        const y = 100 * Math.cos(this.phi);
+        const z = 100 * Math.sin(this.phi) * Math.sin(this.theta);
+        this.camera.lookAt(x, y, z);
+      }
+    });
+  }
+  addText3D(objectName: string, guidName: string, pos: Vector3, rot: Vector3, color: string, name?: number) {
+    const font = null;
+    const scale = new Vector3(1.7, 1.7, 0.1);
+    const loader = new TTFLoader();
+
+    const fontSource = 'assets/fonts/Didot Regular.ttf';
+    loader.load(fontSource, (json) => {
+      const font = new Font(json);
+      const textGeo = new TextGeometry(objectName, {
+        font: font,
+        size: 0.11,
+        height: 0.11,
+      });
+      const material = new MeshBasicMaterial({ color: color });
+      textGeo.center();
+      const mesh = new Mesh(textGeo, material)
+      mesh.name = '' + name;
+      mesh.scale.z = 0.1;
+      mesh.scale.copy(scale)
+      mesh.position.copy(pos);
+      mesh.rotation.setFromVector3(rot);
+      this.scene.add(mesh);
+      this.modelObjects.push(mesh);
+    })
+}
+initRefPos(): void {
+  const loader = new THREE.TextureLoader();
+  const texture = loader.load("assets/images/circle-texture-dark.png");
+  const planeG = new THREE.PlaneGeometry(1, 1);
+  const planeM = new THREE.MeshBasicMaterial({ alphaTest: 0.5, map: texture });
+  this.referencePosition = new THREE.Mesh(planeG, planeM);
+  this.referencePosition.position.set(0, -6, 0);
+  this.referencePosition.rotation.x = -Math.PI / 2;
+  this.referencePosition.scale.set(0.5, 0.5, 0.5)
+  this.scene.add(this.referencePosition);
+}
+}

@@ -1,0 +1,27 @@
+<ngx-spinner
+  bdColor="rgba(51,51,51)"
+  size="medium"
+  color="#fff"
+  type="ball-scale-multiple"
+  [fullScreen]="true"
+>
+  <p style="font-size: 20px; color: white">Loading...</p>
+</ngx-spinner>
+
+<div class="container-fluid" *ngIf="openLive">
+    <div class="row clearfix h-100">
+      <div class="col-lg-12 p-0">
+        <div class="Card chat-app h-100">
+          <!-- <app-all-conversation
+            id="plist"
+            class="people-list"
+            style="display: 'none';"
+            [userId]="userId"
+          ></app-all-conversation> -->
+          <app-conversation [userId]="userId"  class="chat"
+          ></app-conversation>
+        </div>
+      </div>
+    </div>
+  </div>
+  <app-virtuel (onSide)="handleLive($event)" ></app-virtuel>

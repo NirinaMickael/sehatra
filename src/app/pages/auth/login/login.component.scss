@@ -1,0 +1,17 @@
+@import '../../../@shared/themes/_varibale/variable';
+@import '../../../@shared/themes/classe/class.scss';
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+  font-family: Open Sans;
+}
+
+/*--------------------
+Signup
+--------------------*/
+

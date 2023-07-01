@@ -1,0 +1,57 @@
+<ngx-spinner
+  bdColor="rgba(51,51,51)"
+  size="medium"
+  color="#fff"
+  type="ball-scale-multiple"
+  [fullScreen]="true"
+>
+  <p style="font-size: 20px; color: white">Loading...</p>
+</ngx-spinner>
+<div class="wrapper-form login">
+  <div class="wrapper-connect">
+    <h1>Welcome,stay smile</h1>
+    <a href="#" class="btn btn-social btn-facebook"
+      ><i class="fa fa-facebook"></i> Sign in with Facebook</a
+    >
+    <a href="#" class="btn btn-social btn-google"
+      ><i class="fa fa-google"></i> Sign in with Google</a
+    >
+  </div>
+  <div class="wrapper-classic">
+    <form class="form" [formGroup]="loginForm" (submit)="handleSubmit($event)">
+      <fieldset class="email">
+        <input type="email" placeholder="Email" formControlName="email" />
+        <small *ngIf="loginForm.get('email')?.hasError('required')"
+          >Email is required.</small
+        >
+        <small *ngIf="loginForm.get('email')?.hasError('email')"
+          >Invalid email.</small
+        >
+      </fieldset>
+      <fieldset class="password">
+        <input
+          type="password"
+          placeholder="password"
+          formControlName="password"
+        />
+        <small *ngIf="loginForm.get('password')?.hasError('required')"
+          >Email is required.</small
+        >
+      </fieldset>
+      <button
+        type="submit"
+        class="buttonNeomorphic"
+        [disabled]="loginForm.status === 'INVALID' ? true : false"
+      >
+      <span>login</span>
+      </button>
+      <small class="text-danger">{{errorM}}</small>
+    </form>
+    <div class="wrapper-auth">
+      <span class="or">Or</span>
+      <div>
+        <button routerLink="signup" class="Btn"><span>Sign Up</span></button>
+      </div>
+    </div>
+  </div>
+</div>

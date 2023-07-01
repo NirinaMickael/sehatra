@@ -1,0 +1,44 @@
+@import '../../../@shared/themes/_varibale/variable';
+@import '../../../@shared/themes/classe/class.scss';
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+  font-family: Open Sans;
+}
+/*--------------------
+Form
+--------------------*/
+// .form {
+  
+//   fieldset {
+//     border: none;
+//     padding: 0;
+//     margin: 20px 0;
+//     position: relative;
+    
+//     input {
+//       width: 100%;
+//       height: 48px;
+//       color: hsl(0, 0, 20);
+//       padding: 15px 40px 15px 3em;
+//       border-radius: 5px;
+//       font-size: 14px;
+//       outline: none!important;
+//       border: 1px solid hsla(0, 0, 0, 0.3);
+//       box-shadow: inset 0 1px 4px hsla(0, 0, 0, 0.2);
+//       vertical-align: top;
+//     }
+     
+//   }
+// }
+
+
+
+/*--------------------
+Signup
+--------------------*/

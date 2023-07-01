@@ -1,0 +1,22 @@
+<div id="plist" class="people-list">
+  <p class="Title">All friends</p>
+  <ul class="list-unstyled chat-list mt-2 mb-0">
+    <ng-container *ngIf="!allFriendState.isLoading">
+      <li
+        class="clear_fix"
+        *ngFor="let friend of allFriends"
+        (click)="handleClick(friend._id)"
+      >
+        <img src="{{ friend.image }}" alt="avatar" />
+        <div class="about">
+          <div class="name">{{ friend.username }}</div>
+          <div class="status">
+            <i class="fa fa-circle offline"></i>
+            <!-- {{ !checkWritte ? "ecrit....." : "left 7 min ago" }} -->
+            {{friend._id == checkWritte.from && checkWritte.isWrite ? 'ecrit..........' : "left 7 min ago"}}
+          </div>
+        </div>
+      </li>
+    </ng-container>
+  </ul>
+</div>

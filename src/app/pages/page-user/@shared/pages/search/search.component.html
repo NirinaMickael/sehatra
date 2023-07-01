@@ -1,0 +1,25 @@
+<div class="input-group">
+  <div class="input-group-prepend">
+    <span class="input-group-text"><i class="fa fa-search"></i></span>
+  </div>
+  <input
+    type="text"
+    class="form-control"
+    placeholder="Search..."
+    [value]="value"
+    (input)="onChange($event)"
+    #textInput
+  />
+  <ul>
+    <li
+      class="text d-flex"
+      *ngFor="let item of users; let i = index"
+      [ngStyle]="{ 'animation-delay.s': (i + 1) / 10 }"
+      routerLink="{{handleUrl(item.username)}}"
+      (click)="handleClick(item['_id'])"
+    >
+      <img src={{item.image}} alt="no image" srcset="" />
+      <span>{{ item.username }}</span>
+    </li>
+  </ul>
+</div>

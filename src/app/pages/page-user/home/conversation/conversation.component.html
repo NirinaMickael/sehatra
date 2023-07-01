@@ -1,0 +1,80 @@
+<ngx-spinner type=""></ngx-spinner>
+<div class="aside-live grid">
+  <div class="container-video">
+    <div class="blur-effet ">
+      <div class="bulle" *ngIf="reaction" >
+        <div class="two" *ngIf="reaction.id==1">
+          <button class="btn py-1" (click)="handleReaction(1)">
+            <i class="fab fa-angellist" style='font-size:100px;color:#a5e2f5'></i>
+          </button>
+        </div>
+        <div class="two" *ngIf="reaction.id==2">>
+          <button class="btn py-1" (click)="handleReaction(1)">
+            <i class="far fa-angry" style='font-size:100px;color:#ee3a3a'></i>
+          </button>
+        </div>
+      </div>
+      <video [autoplay]="true" [controls]="false"  [muted]="true" src="assets/video.mp4" width="100%"  #video >
+        <source src="video.mp4" type="video/mp4">
+        Your browser does not support HTML5 video.
+        <canvas #canvas></canvas>
+        <!-- <button class="controls__button toggleButton" title="Toggle Play">"dkf,dmfsm</button> -->
+      </video>
+      <div class="action-buton">
+        <button class="btn py-1" (click)="handleReaction(1)">
+          <small> 20 </small>
+          <i class="fab fa-angellist" style='font-size:25px;color:#a5e2f5'></i>
+        </button>
+        <button class="btn  py-1" (click)="handleReaction(2)" >
+          <small> 40 </small>
+          <i class="far fa-angry" style='font-size:25px;color:#ee3a3a'></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="chat d-grid">
+    <!-- <app-header-chat class="chat-header"></app-header-chat> -->
+    <div class="chat-history">
+      <ul class="m-b-0 d-grid">
+        <!-- <app-message class="clearfix other wrapperMessage" [owner]="true"></app-message> -->
+        <ng-container *ngIf="!allMessageState.isLoading">
+          <app-message
+            class="clearfix wrapperMessage"
+            *ngFor="let item of message"
+            [owner]="item.senderId == ownId"
+            [Message]="item"
+            [image]="otherImage"
+          ></app-message>
+        </ng-container>
+        <p *ngIf="allMessageState.isLoading">Loading.....</p>
+      </ul>
+    </div>
+    <div class="chat-message clearfix">
+      <form [formGroup]="registerForm" (ngSubmit)="handleSubmit()">
+        <div class="input-group mb-0">
+          <div class="input-group-append">
+            <button class="btn btn-outline-info py-2">
+              <i class="fa fa-cogs"></i>
+            </button>
+            <button class="btn btn-outline-secondary py-2">
+              <i class="fa fa-camera"></i>
+            </button>
+          </div>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Enter text here..."
+            formControlName="messages"
+            (input)="handleChange($event)"
+          />
+          <div class="input-group-prepend">
+            <button type="submit" class="input-group-text py-2">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+</div>

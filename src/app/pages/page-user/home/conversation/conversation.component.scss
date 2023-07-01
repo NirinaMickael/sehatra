@@ -1,0 +1,74 @@
+@import "../../@shared/themes/classes.scss";
+@import "../../../../@shared/themes/_varibale/variable";
+small{
+  color:black;
+  font-size:medium;
+}
+.aside-live {
+  box-shadow: 2px 2px 2px #333;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 70% 30%;
+}
+.blur-effet {
+  height: 100%;
+  display: grid;
+  align-content: center;
+  background-image: url("/assets/materials/modern-metal-wall/modern-metal-wall_albedo.png");
+  
+  /* Add the blur effect */
+  filter: blur(0.5px);
+  -webkit-filter: blur(0.5px);
+  
+  /* Full height */
+  height: 100%; 
+  
+  /* Center and scale the image nicely */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.chat {
+  // grid-template-rows: 10% 75% 15%;
+  align-content: space-between;
+  display: grid;
+}
+.chat .chat-history {
+  padding: 20px;
+  max-height: 450px;
+  overflow: auto;
+}
+
+.chat .chat-history ul {
+  padding: 0;
+  #true {
+    justify-self: end;
+    .text-right {
+      text-align: right;
+    }
+  }
+}
+
+.chat .chat-history ul .wrapperMessage {
+  list-style: none;
+  // margin-bottom: 30px;
+}
+
+.chat .chat-history ul .wrapperMessage:last-child {
+  margin-bottom: 0px;
+}
+
+.chat .chat-message {
+  padding: 20px;
+}
+
+
+
+
+//////
+
+.bulle {
+    position: absolute;
+    top: 50%;
+    left: 30%;
+}
